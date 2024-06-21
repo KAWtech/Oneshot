@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Processing</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Processing Workflow</h1>
+        
+        <h2>Upload Images</h2>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" name="images" id="images" multiple required>
+            <button type="submit">Upload Images</button>
+        </form>
+        
+        <h2>Process Images</h2>
+        <button id="process-button">Run Task</button>
+
+        <div id="result"></div>
+    </div>
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let formData = new FormData(this);
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = data.message;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('process-button').addEventListener('click', function() {
+            fetch('/process_images', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = data.message;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
