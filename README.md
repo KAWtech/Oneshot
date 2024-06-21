@@ -39,7 +39,7 @@ Oneshot is a system designed to detect objects of interest in images, generate a
 
 ## Contact
 
-For questions or comments, please contact us at [info@kawtech.com](mailto:info@kawtech.com).
+For any problems/bugs/enhancements, please open an issue on this repo with the proper labels.
 
 ---
 
