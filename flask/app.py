@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, render_template
+import json
 import os
 import logging
+import requests
 app = Flask(__name__)
-UPLOAD_FOLDER = '/home/arshia/Oneshot/flask/uploads'
+UPLOAD_FOLDER = '/home/kss/Desktop/oneshot/Oneshot/flask/uploads'
 RESULT_FOLDER = 'results'
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -13,8 +15,46 @@ def label_images_with_cvat(image_paths):
     pass
 
 def process_with_nodeodm(image_paths):
-    # Add NodeODM API integration here
-    pass
+    # Log the image paths to be processed
+    logging.info("Starting NodeODM processing for images: %s", image_paths)
+
+    # NodeODM API URL for creating a new task
+    url = "http://127.0.0.1:3000/task/new"
+    
+    # Prepare the files for the multipart/form-data request
+    files = []
+    for path in image_paths:
+        # Assuming each path is the path to an image file
+        files.append(('images', (os.path.basename(path), open(path, 'rb'), 'image/jpeg')))
+    
+    # Define options including the 'end-with' option
+    options = json.dumps([
+        {"name": "end-with", "value": "opensfm"},  # Modify the value as necessary for your use case
+        # Add more options here if necessary
+    ])
+
+    # FormData including the serialized options
+    data = {
+        'options': options
+    }
+
+    try:
+        # NodeODM POST request ending at sparse point cloud
+        response = requests.post(url, files=files, data=data)
+        if response.status_code == 200:
+            task_info = response.json()
+            logging.info("Task created successfully: %s", task_info)
+            return jsonify({'message': 'NodeODM task created successfully', 'Task Info': task_info}), 200
+        else:
+            logging.error("Failed to create task, status code: %d", response.status_code)
+            return jsonify({'error': 'Failed to create NodeODM task'}), response.status_code
+    except Exception as e:
+        logging.error("Error when calling NodeODM API: %s", str(e))
+        return jsonify({'error': 'Error when calling NodeODM API', 'exception': str(e)}), 500
+    finally:
+        # Close files
+        for _, file_tuple in files:
+            file_tuple[1].close()
 
 def start_opensplat_process(ply_file, images, camera_poses):
     # Add opensplat process integration here
