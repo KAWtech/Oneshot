@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  nodeodm:
+    image: oneshot_nodeodm
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/oneshotdata:/var/www/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped

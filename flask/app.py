@@ -20,7 +20,7 @@ def process_with_nodeodm(image_paths):
 
     # NodeODM API URL for creating a new task
     url = "http://127.0.0.1:3000/task/new"
-    
+    uuid = ""
     # Prepare the files for the multipart/form-data request
     files = []
     for path in image_paths:
@@ -43,18 +43,22 @@ def process_with_nodeodm(image_paths):
         response = requests.post(url, files=files, data=data)
         if response.status_code == 200:
             task_info = response.json()
+            uuid = task_info.get('uuid')
             logging.info("Task created successfully: %s", task_info)
-            return jsonify({'message': 'NodeODM task created successfully', 'Task Info': task_info}), 200
+            # return jsonify({'message': 'NodeODM task created successfully', 'Task Info': task_info}), 200
         else:
             logging.error("Failed to create task, status code: %d", response.status_code)
-            return jsonify({'error': 'Failed to create NodeODM task'}), response.status_code
+            # return jsonify({'error': 'Failed to create NodeODM task'}), response.status_code
     except Exception as e:
         logging.error("Error when calling NodeODM API: %s", str(e))
-        return jsonify({'error': 'Error when calling NodeODM API', 'exception': str(e)}), 500
+        # return jsonify({'error': 'Error when calling NodeODM API', 'exception': str(e)}), 500
     finally:
         # Close files
         for _, file_tuple in files:
             file_tuple[1].close()
+    logging.info("UUID of task: %s", uuid)
+    
+
 
 def start_opensplat_process(ply_file, images, camera_poses):
     # Add opensplat process integration here
