@@ -37,6 +37,13 @@ Oneshot is a system designed to detect objects of interest in images, generate a
 5. **Front End Viewing**
    - Users can view the visualized point cloud through the front-end viewer.
 
+## Getting Started!
+
+1. Before cloning, the user should ensure they are running on Linux have Docker set up on their system.
+2. Navigate to the the directory containing *docker-compose.yml*. Execute ```docker-compose up -d``` to start the NodeODM and OpenSplat containers
+3. Navigate to the *flask* directory. Run ```flask --app app run``` to start the web server at http://127.0.0.1:5000
+4. Upload images and enjoy! To monitor task progress you can visit http://127.0.0.1:3000.
+
 ## Contact
 
 For any problems/bugs/enhancements, please open an issue on this repo with the proper labels.
