@@ -3,6 +3,7 @@ import json
 import os
 import logging
 import requests
+import time
 app = Flask(__name__)
 UPLOAD_FOLDER = '/home/kss/Desktop/oneshot/Oneshot/flask/uploads'
 RESULT_FOLDER = 'results'
@@ -17,23 +18,17 @@ def label_images_with_cvat(image_paths):
 def process_with_nodeodm(image_paths):
     # Log the image paths to be processed
     logging.info("Starting NodeODM processing for images: %s", image_paths)
-
     # NodeODM API URL for creating a new task
     url = "http://127.0.0.1:3000/task/new"
     uuid = ""
-    # Prepare the files for the multipart/form-data request
+    # Prepare the files for the form-data request
     files = []
     for path in image_paths:
-        # Assuming each path is the path to an image file
         files.append(('images', (os.path.basename(path), open(path, 'rb'), 'image/jpeg')))
-    
-    # Define options including the 'end-with' option
+    # Define options
     options = json.dumps([
-        {"name": "end-with", "value": "opensfm"},  # Modify the value as necessary for your use case
-        # Add more options here if necessary
+        {"name": "end-with", "value": "opensfm"},
     ])
-
-    # FormData including the serialized options
     data = {
         'options': options
     }
@@ -56,13 +51,40 @@ def process_with_nodeodm(image_paths):
         # Close files
         for _, file_tuple in files:
             file_tuple[1].close()
-    logging.info("UUID of task: %s", uuid)
+    time.sleep(50) # ******THIS IS A HARDCODED ASYNC HELPER, NEED TO MAKE IT ASYNC FOR REAL******
+    return uuid
     
 
 
-def start_opensplat_process(ply_file, images, camera_poses):
+def start_opensplat_process(uuid):
     # Add opensplat process integration here
-    pass
+    # Construct the path to the NodeODM task data
+    task_data_path = f"/var/www/data/{uuid}"
+    output_path = f"{task_data_path}/splat.ply"
+    # Log the path for debugging
+    print(f"Starting OpenSplat processing for task at: {task_data_path}")
+
+    # Assuming we need to call OpenSplat with this path
+    # Replace 'opensplat_executable_path' with the actual path to your OpenSplat executable if necessary
+    opensplat_command = f"docker exec oneshot_opensplat_1 /code/build/opensplat {task_data_path} -o {output_path} -n 100"
+
+    try:
+        # Import subprocess to execute the external command
+        import subprocess
+
+        # Run the OpenSplat process
+        result = subprocess.run(opensplat_command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        # Check if the OpenSplat process was successful
+        if result.returncode == 0:
+            logging.info("Output:", result.stdout)
+            logging.info("OpenSplat processing completed successfully.")
+        else:
+            logging.info("OpenSplat processing failed.")
+            logging.info("Error:", result.stderr)
+
+    except subprocess.CalledProcessError as e:
+        print(f"OpenSplat command failed with {e}")
 
 @app.route('/')
 def index():
@@ -110,9 +132,9 @@ def process_images():
             image_paths.append(file_path)
     logging.info(image_paths)
     label_images_with_cvat(image_paths)
-    process_with_nodeodm(image_paths)
+    uuid = process_with_nodeodm(image_paths)
+    start_opensplat_process(uuid)
     return jsonify({'message': 'Images processed with CVAT and NodeODM successfully'}), 200
-
 
 # Once NodeODM is at the last stage, it should call this route and POST the .ply, camera poses, and images
 # And this route will use those and send them in to start OpenSplat
