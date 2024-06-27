@@ -5,7 +5,23 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /var/oneshotdata:/var/www/data
+      - /var/www/data:/var/www/data
     environment:
       - NODE_ENV=production
     restart: unless-stopped
+
+  opensplat:
+    image: oneshot_opensplat
+    runtime: nvidia
+    volumes:
+      - /var/www/data:/var/www/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
