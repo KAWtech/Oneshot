@@ -5,8 +5,9 @@ import logging
 import requests
 import time
 app = Flask(__name__)
-UPLOAD_FOLDER = '/home/kss/Desktop/oneshot/Oneshot/flask/uploads'
-RESULT_FOLDER = 'results'
+current_directory = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
+RESULT_FOLDER = os.path.join(current_directory, 'results')
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
