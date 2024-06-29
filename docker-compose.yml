@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   nodeodm:
-    image: oneshot_nodeodm
+    image: kawtech/oneshot:nodeodm_latest
     ports:
       - "3000:3000"
     volumes:
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   opensplat:
-    image: oneshot_opensplat
+    image: kawtech/oneshot:opensplat_latest
     runtime: nvidia
     volumes:
       - /var/www/data:/var/www/data
