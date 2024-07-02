@@ -20,7 +20,7 @@ def process_with_nodeodm(image_paths):
     # Log the image paths to be processed
     logging.info("Starting NodeODM processing for images: %s", image_paths)
     # NodeODM API URL for creating a new task
-    url = "http://127.0.0.1:3000/task/new"
+    url = "http://oneshot-nodeodm-1:3000/task/new"
     uuid = ""
     # Prepare the files for the form-data request
     files = []
@@ -64,15 +64,15 @@ def start_opensplat_process(uuid):
     output_path = f"{task_data_path}/splat.ply"
     # Log the path for debugging
     print(f"Starting OpenSplat processing for task at: {task_data_path}")
-
+    logging.info("starting opensplat process")
     # Assuming we need to call OpenSplat with this path
     # Replace 'opensplat_executable_path' with the actual path to your OpenSplat executable if necessary
     opensplat_command = f"docker exec oneshot_opensplat_1 /code/build/opensplat {task_data_path} -o {output_path} -n 100"
-
+    logging.info(f"about to run opensplate command {opensplat_command}")
     try:
         # Import subprocess to execute the external command
         import subprocess
-
+        logging.info("import subprocess")
         # Run the OpenSplat process
         result = subprocess.run(opensplat_command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
@@ -85,7 +85,7 @@ def start_opensplat_process(uuid):
             logging.info("Error:", result.stderr)
 
     except subprocess.CalledProcessError as e:
-        print(f"OpenSplat command failed with {e}")
+        logging.info(f"OpenSplat command failed with {e}")
 
 @app.route('/')
 def index():

@@ -40,8 +40,8 @@ Oneshot is a system designed to detect objects of interest in images, generate a
 ## Getting Started!
 
 1. Before cloning, the user should ensure they are running on Linux have Docker set up on their system.
-2. Navigate to the the directory containing *docker-compose.yml*. Execute ```docker-compose up -d``` to start the NodeODM and OpenSplat containers
-3. Navigate to the *flask* directory. Run ```flask --app app run``` to start the web server at http://127.0.0.1:5000
+2. Navigate to the the directory containing *docker-compose.yml*. Execute ```docker-compose up -d``` to start the Flask, NodeODM and OpenSplat containers
+3. Visit the web server at http://127.0.0.1:5000 and follow the instructions.
 4. Upload images and enjoy! To monitor task progress you can visit http://127.0.0.1:3000.
 
 ## Contact
