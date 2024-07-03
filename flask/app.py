@@ -4,6 +4,7 @@ import os
 import logging
 import requests
 import time
+import cvat_sdk
 app = Flask(__name__)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
