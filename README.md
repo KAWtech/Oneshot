@@ -1,4 +1,11 @@
-# Oneshot 
+#    ____  _   _____________ __  ______  ______
+#  / __ \/ | / / ____/ ___// / / / __ \/_  __/
+# / / / /  |/ / __/  \__ \/ /_/ / / / / / /   
+#/ /_/ / /|  / /___ ___/ / __  / /_/ / / /    
+#\____/_/ |_/_____//____/_/ /_/\____/ /_/     
+                                             
+
+
 
 ## Overview
 Oneshot is a system designed to detect objects of interest in images, generate a point cloud, and visualize the results in a front-end viewer. The system leverages Flask for the web server, CVAT for object detection, ODM for point cloud generation, and Open Splat for visualization.
