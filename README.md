@@ -40,9 +40,9 @@ Oneshot is a system designed to detect objects of interest in images, generate a
 ## Getting Started!
 
 To start Oneshot, run ./start-oneshot.sh from the terminal inside the Oneshot directory.
-   - further instructions are visible once Oneshot has started :3
+   - further instructions are visible once Oneshot has started successfully :3
 
-To stop Oneshot, run ./stop-oneshot.sh form the terminal inside the Oneshot directory.
+To stop Oneshot, run ./stop-oneshot.sh from the terminal inside the Oneshot directory.
 
 
 ## Contact
