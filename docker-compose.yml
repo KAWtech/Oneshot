@@ -11,6 +11,7 @@ services:
     restart: unless-stopped
     networks:
       - bridge_network
+      - cvat_cvat
 
   opensplat:
     image: kawtech/oneshot:opensplat_latest
@@ -29,6 +30,7 @@ services:
             - capabilities: [gpu]
     networks:
       - bridge_network
+      - cvat_cvat
 
   flaskapp:
     build:
@@ -50,7 +52,10 @@ services:
     restart: unless-stopped
     networks:
       - bridge_network
+      - cvat_cvat
 
 networks:
+  cvat_cvat:
+    external: true
   bridge_network:
     driver: bridge

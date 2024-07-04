@@ -4,6 +4,10 @@ import os
 import logging
 import requests
 import time
+import cvat_sdk
+from run_cvat_and_gen_seg_mask import main
+import concurrent.futures
+
 app = Flask(__name__)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
@@ -12,11 +16,11 @@ os.makedirs(RESULT_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
 
-def label_images_with_cvat(image_paths):
-    # Add CVAT API integration here
-    pass
+def label_images_with_cvat():
+    main()
+    return "Successful"
 
-def process_with_nodeodm(image_paths):
+def process_with_nodeodm(image_paths):  
     # Log the image paths to be processed
     logging.info("Starting NodeODM processing for images: %s", image_paths)
     # NodeODM API URL for creating a new task
@@ -33,7 +37,6 @@ def process_with_nodeodm(image_paths):
     data = {
         'options': options
     }
-
     try:
         # NodeODM POST request ending at sparse point cloud
         response = requests.post(url, files=files, data=data)
@@ -55,7 +58,23 @@ def process_with_nodeodm(image_paths):
     time.sleep(50) # ******THIS IS A HARDCODED ASYNC HELPER, NEED TO MAKE IT ASYNC FOR REAL******
     return uuid
     
-
+def poll_nodeodm_task_status(uuid):
+    url = f"http://oneshot-nodeodm-1:3000/task/{uuid}/info"
+    while True:
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                response_dict = json.loads(response.content.decode('utf-8'))
+                progress = response_dict.get('progress')
+                logging.info("NodeODM task status: %s", progress)
+                if progress == 100:
+                    break
+            else:
+                logging.error("Failed to get task status, status code: %d", response.status_code)
+        except Exception as e:
+            logging.error("Error when polling NodeODM API: %s", str(e))
+        time.sleep(10)
+    return "NodeODM task completed"
 
 def start_opensplat_process(uuid):
     # Add opensplat process integration here
@@ -67,7 +86,7 @@ def start_opensplat_process(uuid):
     logging.info("starting opensplat process")
     # Assuming we need to call OpenSplat with this path
     # Replace 'opensplat_executable_path' with the actual path to your OpenSplat executable if necessary
-    opensplat_command = f"docker exec oneshot_opensplat_1 /code/build/opensplat {task_data_path} -o {output_path} -n 100"
+    opensplat_command = f"docker exec oneshot-opensplat-1 /code/build/opensplat {task_data_path} -o {output_path} -n 100"
     logging.info(f"about to run opensplate command {opensplat_command}")
     try:
         # Import subprocess to execute the external command
@@ -132,9 +151,15 @@ def process_images():
         if os.path.isfile(file_path):
             image_paths.append(file_path)
     logging.info(image_paths)
-    label_images_with_cvat(image_paths)
-    uuid = process_with_nodeodm(image_paths)
-    start_opensplat_process(uuid)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future_label = executor.submit(label_images_with_cvat)
+        future_label.result()  # Wait for label_images_with_cvat to finish
+        future_process = executor.submit(process_with_nodeodm, image_paths)
+        uuid = future_process.result()
+        future_progress = executor.submit(poll_nodeodm_task_status, uuid)
+        progress = future_progress.result()
+        future_opensplat = executor.submit(start_opensplat_process, uuid)
+        concurrent.futures.wait([future_opensplat], return_when=concurrent.futures.ALL_COMPLETED)
     return jsonify({'message': 'Images processed with CVAT and NodeODM successfully'}), 200
 
 # Once NodeODM is at the last stage, it should call this route and POST the .ply, camera poses, and images
