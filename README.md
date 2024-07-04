@@ -1,4 +1,4 @@
-<div style="text-align:center;">
+<div style="display: flex; justify-content: center;">
 
 <pre>
    ____  _   _____________ __  ______  ______
