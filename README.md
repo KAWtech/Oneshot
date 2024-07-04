@@ -39,15 +39,9 @@ Oneshot is a system designed to detect objects of interest in images, generate a
 
 ## Getting Started!
 
-1. Before cloning, the user should ensure they are running on Linux have Docker set up on their system.
-2. Navigate to the the directory containing *docker-compose.yml*. Execute ```docker-compose up -d``` to start the Flask, NodeODM and OpenSplat containers
-3. Visit the web server at http://127.0.0.1:5000 and follow the instructions.
-4. cd cvat && docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d --build
-5. sudo chmod +x nuctl-1.11.24-linux-amd64
-6. sudo ln -sf nuctl-1.11.24-linux-amd64 /usr/bin/nuctl
-7. sudo ./nuctl-1.11.24-linux-amd64 create project cvat
-8. sudo ./nuctl deploy --project-name cvat --path "/home/arshia/Oneshot/cvat/serverless/onnx/WongKinYiu/yolov7/nuclio" --platform local
-9. Upload images and enjoy! To monitor task progress you can visit http://127.0.0.1:3000.
+To start Oneshot, run ./start-oneshot.sh from the terminal inside the Oneshot directory.
+   - further instructions are visible once Oneshot has started :3
+To stop Oneshot, run ./stop-oneshot.sh form the terminal inside the Oneshot directory.
 
 
 ## Contact
