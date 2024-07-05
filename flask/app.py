@@ -34,6 +34,8 @@ def process_with_nodeodm(image_paths):
         files.append(('images', (os.path.basename(path), open(path, 'rb'), 'image/jpeg')))    # Define options
     options = json.dumps([
         {"name": "end-with", "value": "opensfm"},
+        {"name": "gpus", "value": "all"},
+        {"name": "pc-quality", "value": "ultra"}
     ])
     data = {
         'options': options

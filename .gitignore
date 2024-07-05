@@ -49,6 +49,8 @@ instance/
 # CVAT results and uploads
 cvat_results/
 uploads/
+source/oneshot/node_modules
+flask/__pycache__
 
 # Docker
 *.log
