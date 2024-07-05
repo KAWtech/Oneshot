@@ -15,6 +15,7 @@ RESULT_FOLDER = os.path.join(current_directory, 'results')
 CVAT_RESULTS = os.path.join(current_directory, 'cvat_results')
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(CVAT_RESULTS, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
 
 def label_images_with_cvat():
