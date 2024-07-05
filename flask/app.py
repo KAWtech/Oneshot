@@ -14,6 +14,7 @@ CORS(app)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
 RESULT_FOLDER = os.path.join(current_directory, 'results')
+CVAT_RESULTS = os.path.join(current_directory, 'cvat_results')
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
@@ -31,8 +32,7 @@ def process_with_nodeodm(image_paths):
     # Prepare the files for the form-data request
     files = []
     for path in image_paths:
-        files.append(('images', (os.path.basename(path), open(path, 'rb'), 'image/jpeg')))
-    # Define options
+        files.append(('images', (os.path.basename(path), open(path, 'rb'), 'image/jpeg')))    # Define options
     options = json.dumps([
         {"name": "end-with", "value": "opensfm"},
     ])
@@ -116,32 +116,36 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_images():
     # Clean up the upload folder before saving new files
-    for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
+    for filename in os.listdir(UPLOAD_FOLDER):  # Iterate over all files in the upload folder
+        file_path = os.path.join(UPLOAD_FOLDER, filename)  # Get the full path of the file
         try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-                logging.info(f"Deleted file {file_path}")
-            elif os.path.isdir(file_path):
-                os.rmdir(file_path)
-                logging.info(f"Deleted directory {file_path}")
-        except Exception as e:
-            logging.error(f"Failed to delete {file_path}: {e}")
-            return jsonify({'error': str(e)}), 500
-    files = request.files.getlist('images')
-    if not files:
-        logging.error("No files received for upload")
-        return jsonify({'error': 'No files received'}), 400
-    for idx, file in enumerate(files):
-        filename = f"{idx}.jpg"
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
+            if os.path.isfile(file_path) or os.path.islink(file_path):  # Check if it is a file or symbolic link
+                os.unlink(file_path)  # Delete the file or symbolic link
+                logging.info(f"Deleted file {file_path}")  # Log the deletion of the file
+            elif os.path.isdir(file_path):  # Check if it is a directory
+                os.rmdir(file_path)  # Delete the directory
+                logging.info(f"Deleted directory {file_path}")  # Log the deletion of the directory
+        except Exception as e:  # Catch any exceptions that occur
+            logging.error(f"Failed to delete {file_path}: {e}")  # Log the error
+            return jsonify({'error': str(e)}), 500  # Return an error response
+
+    files = request.files.getlist('images')  # Get the list of files from the request
+    if not files:  # Check if no files were received
+        logging.error("No files received for upload")  # Log the error
+        return jsonify({'error': 'No files received'}), 400  # Return an error response
+
+    for idx, file in enumerate(files):  # Iterate over the received files
+        filename = f"{idx}.jpg"  # Generate a new filename for each file
+        file_path = os.path.join(UPLOAD_FOLDER, filename)  # Get the full path for the new file
         try:
-            file.save(file_path)
-            logging.info(f"Saved file {filename} to {file_path}")
-        except Exception as e:
-            logging.error(f"Error saving file {filename}: {e}")
-            return jsonify({'error': str(e)}), 500
-    return jsonify({'message': 'Images uploaded successfully'}), 200
+            file.save(file_path)  # Save the file to the specified path
+            logging.info(f"Saved file {filename} to {file_path}")  # Log the successful save
+        except Exception as e:  # Catch any exceptions that occur
+            logging.error(f"Error saving file {filename}: {e}")  # Log the error
+            return jsonify({'error': str(e)}), 500  # Return an error response
+
+    return jsonify({'message': 'Images uploaded successfully'}), 200  # Return a success response
+
 
 # Once user presses "Run Task" on the frontend, this is called and uses the images
 # the user uploaded and does CVAT labelling, and then starts NodeODM with those images
