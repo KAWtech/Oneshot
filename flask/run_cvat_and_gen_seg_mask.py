@@ -16,18 +16,20 @@ from zipfile import ZipFile
 from time import sleep
 from datetime import datetime
 
-USERNAME="internal"
-PASSWORD="technologydestroyer0A"
+USERNAME="wyattjl"
+PASSWORD="Calebjoe1!"
+now = datetime.now()
+TASK_NAME = "task_" + str(now)
 
 def create_task():
     configuration = Configuration(host="http://cvat-server:8080",username=USERNAME,password=PASSWORD,)
     print("username: " + USERNAME)
     print("password: " + PASSWORD)
     now = datetime.now()
-    task_name = "task_" + str(now)
+    TASK_NAME = "task_" + str(now)
     with ApiClient(configuration) as api_client:
         task_spec = {
-            'name': task_name,
+            'name': TASK_NAME,
             'labels': [
                 {"name": "person", "color": "#FF5733"},
                 {"name": "bicycle", "color": "#C70039"},
@@ -119,11 +121,13 @@ def create_task():
             return "Failed to create task"
         logging.info("task created")
         inference_dir = "uploads/"
+        logging.info("inference directory: " + inference_dir)
         task_data = None
         if os.path.exists(inference_dir):
+            logging.info("The 'currentinference' directory exists.")
             # List all image files inside the directory
             image_files = [f for f in os.listdir(inference_dir) if f.endswith('.jpg') or f.endswith('.png') or f.endswith('.JPG') or f.endswith('.PNG')]
-            #image_files = sorted(image_files, key=lambda f: int(os.path.splitext(f)[0]))
+            # image_files = sorted(image_files, key=lambda f: int(os.path.splitext(f)[0]))
             # Open each image file for reading
             client_files = [open(os.path.join(inference_dir, image), 'rb') for image in image_files]
             logging.info(client_files) 
@@ -132,7 +136,7 @@ def create_task():
                 client_files=client_files,
             )
         else:
-            print("The 'currentinference' directory does not exist.")
+            logging.info("The 'currentinference' directory does not exist.")
         (_, response) = api_client.tasks_api.create_data(task.id,
             data_request=task_data,
             _content_type="multipart/form-data",
@@ -185,49 +189,44 @@ def annotate_images(taskid):
                 break
             sleep(3)
         
-
 def save_and_overlay_images(taskid):
     pbar_out = io.StringIO()
     pbar = make_pbar(file=pbar_out)
-    path = "uploads/cvat_task.zip"
-    if os.path.exists(path):
-        os.remove(path)
-        logging.info("Existing file removed before new download.")
-    with make_client(host="http://cvat-server:8080",credentials=(USERNAME,PASSWORD)) as client:
-        client.tasks.retrieve(taskid).export_dataset(format_name="Segmentation mask 1.1",filename=path,pbar=pbar,include_images=True)
+    path = f"cvat_results/{TASK_NAME}_cvat_task.zip"
+
+    with make_client(host="http://cvat-server:8080", credentials=(USERNAME, PASSWORD)) as client:
+        client.tasks.retrieve(taskid).export_dataset(format_name="Segmentation mask 1.1", filename=path, pbar=pbar, include_images=True)
     logging.info("Exported Dataset")
     sleep(15)
     assert "100%" in pbar_out.getvalue().strip("\r").split("\r")[-1]
     logging.info(zipfile.is_zipfile(path))
-    if not os.listdir('uploads/') == []:
-        for filename in os.listdir('uploads/'):
-            if filename == 'cvat_task.zip':
-                continue
-            filepath = os.path.join('uploads/',filename)
-            try:
-                shutil.rmtree(filepath)
-            except OSError:
-                os.remove(filepath)
-    print("Cleaned out directory")
+
+    task_result_dir = f"cvat_results/{TASK_NAME}"
+    os.makedirs(task_result_dir, exist_ok=True)
+
     with ZipFile(path, 'r') as zf:
-        zf.extractall("uploads/")
+        zf.extractall(task_result_dir)
         sleep(15)
-        shutil.rmtree("uploads/ImageSets")
-        shutil.rmtree("uploads/SegmentationObject")
-        os.remove("uploads/labelmap.txt")
-        os.mkdir(path="uploads/output/")
+        shutil.rmtree(os.path.join(task_result_dir, "ImageSets"))
+        shutil.rmtree(os.path.join(task_result_dir, "SegmentationObject"))
+        os.remove(os.path.join(task_result_dir, "labelmap.txt"))
+        output_dir = os.path.join(task_result_dir, "output")
+        os.makedirs(output_dir, exist_ok=True)
         os.remove(path)
-        success = overlay_masks_with_fallback('uploads/JPEGImages', 'uploads/SegmentationClass', 'uploads/output/')
+        success = overlay_masks_with_fallback(os.path.join(task_result_dir, 'JPEGImages'),
+                                              os.path.join(task_result_dir, 'SegmentationClass'),
+                                              output_dir)
         if success:
             print("All images have been overlayed successfully.")
         else:
             print("There was an error processing the images.")
-        for filename in os.listdir("uploads/output"):
-            shutil.move("uploads/output/"+filename,"uploads/")
-        shutil.rmtree("uploads/output")
-        shutil.rmtree("uploads/JPEGImages")
-        shutil.rmtree("uploads/SegmentationClass")
-        return "Successful"   
+        for filename in os.listdir(output_dir):
+            shutil.move(os.path.join(output_dir, filename), task_result_dir)
+        shutil.rmtree(output_dir)
+        shutil.rmtree(os.path.join(task_result_dir, 'JPEGImages'))
+        shutil.rmtree(os.path.join(task_result_dir, 'SegmentationClass'))
+        return "Successful"
+
     
 def main():
     task_id = create_task()
