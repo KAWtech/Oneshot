@@ -16,8 +16,8 @@ from zipfile import ZipFile
 from time import sleep
 from datetime import datetime
 
-USERNAME="wyattjl"
-PASSWORD="Calebjoe1!"
+USERNAME="internal"
+PASSWORD="Skatka123"
 now = datetime.now()
 TASK_NAME = "task_" + str(now)
 

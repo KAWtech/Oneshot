@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
 import json
 import os
 import logging
@@ -10,7 +9,6 @@ from run_cvat_and_gen_seg_mask import main
 import concurrent.futures
 
 app = Flask(__name__)
-CORS(app)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
 RESULT_FOLDER = os.path.join(current_directory, 'results')
