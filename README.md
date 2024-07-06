@@ -46,7 +46,8 @@ Oneshot is a system designed to detect objects of interest in images, generate a
 ## Getting Started!
 
 To start Oneshot, run ./start-oneshot.sh from the terminal inside the Oneshot directory.
-   - further instructions are visible once Oneshot has started successfully :3
+   - You MUST change the USERNAME and PASSWORD variables in the run_cvat_and_gen_seg_mask.py file. These credentials must match the account you created locally.
+   - Further instructions on how to use Oneshot will be displayed in the terminal once started successfully.
 
 To stop Oneshot, run ./stop-oneshot.sh from the terminal inside the Oneshot directory.
 
