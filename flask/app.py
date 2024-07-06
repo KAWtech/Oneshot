@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask_cors import CORS
 import json
 import os
 import logging
@@ -9,6 +10,7 @@ from run_cvat_and_gen_seg_mask import main
 import concurrent.futures
 
 app = Flask(__name__)
+CORS(app)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
 RESULT_FOLDER = os.path.join(current_directory, 'results')
@@ -194,6 +196,26 @@ def task_complete():
     result_path = os.path.join(RESULT_FOLDER, camera_poses)
     
     return jsonify({'message': 'Task completed and results saved successfully'}), 200
+
+@app.route('/tasks', methods=['GET'])
+@app.route('/tasks', methods=['GET'])
+def get_tasks():
+    tasks_dir = '/var/www/data/'
+    tasks = []
+    for name in os.listdir(tasks_dir):
+        task_path = os.path.join(tasks_dir, name)
+        if os.path.isdir(task_path):
+            image_path = os.path.join(task_path, 'images', '0.jpg')
+            if os.path.exists(image_path):
+                tasks.append({
+                    'id': name,
+                    'image_url': f'/data/{name}/images/0.jpg'
+                })
+    return jsonify(tasks)
+
+@app.route('/data/<task_id>/images/<filename>')
+def get_image(task_id, filename):
+    return send_from_directory(f'/var/www/data/{task_id}/images', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)

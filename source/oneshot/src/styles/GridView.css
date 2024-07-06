@@ -1,5 +1,5 @@
 .body-content {
-    margin: 0 8%;
+    margin: 0 5%;
     position: relative;
 }
 
@@ -22,6 +22,7 @@
     display: flex;
     align-items: center;
     margin-top: 20px; /* Adjust as needed for spacing */
+    margin-bottom: 20px;
 }
   
 .add-task-text {

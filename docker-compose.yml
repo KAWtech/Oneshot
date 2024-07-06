@@ -53,6 +53,23 @@ services:
     networks:
       - bridge_network
       - cvat_cvat
+  
+  web:
+    build:
+      context: ./source
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./source:/app
+      - /app/node_modules
+      - /var/www/data:/var/www/data
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    networks:
+      - bridge_network
+      - cvat_cvat
 
 networks:
   cvat_cvat:

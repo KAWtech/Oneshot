@@ -53,8 +53,8 @@ sudo ./nuctl-1.11.24-linux-amd64 deploy --project-name cvat --path "serverless/o
 
 cd ..
 
-# Start the Flask, NodeODM, and OpenSplat containers
-echo "Starting Flask, NodeODM, and OpenSplat containers..."
+# Start the Web, Flask, NodeODM, and OpenSplat containers
+echo "Starting Web, Flask, NodeODM, and OpenSplat containers..."
 docker compose up -d
 
 # Instructions for uploading images
