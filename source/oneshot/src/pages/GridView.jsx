@@ -7,6 +7,7 @@ const GridView = () => {
   const [showModal, setShowModal] = useState(false);
   const [result, setResult] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [taskName, setTaskName] = useState('');
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -52,13 +53,22 @@ const GridView = () => {
 
     try {
       const response = await fetch('http://localhost:5000/process_images', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ taskName }) // Include the task name
       });
       const data = await response.json();
       setResult(data.message);
     } catch (error) {
       console.error('Error:', error);
     }
+  };
+
+  const handleDownload = (taskId) => {
+    const url = `http://localhost:5000/download_splat/${taskId}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -93,7 +103,7 @@ const GridView = () => {
               </CardContent>
               <CardActions sx={{ marginTop: 'auto' }}>
                 <Button size="small">View Splat</Button>
-                <Button size="small">Download Splat</Button>
+                <Button size="small" onClick={() => handleDownload(task.id)}>Download Splat</Button>
               </CardActions>
               </Card>
             </Grid>
@@ -105,9 +115,16 @@ const GridView = () => {
           <div className="modal">
             <button onClick={handleCloseModal} className="close-button">&times;</button>
             <h2>Create Task</h2>
-            <form id="upload-form" encType="multipart/form-data" onSubmit={handleUpload}>
-              <input type="file" name="images" id="images" multiple required />
-              <button type="submit">Upload Images</button>
+            <form id="upload-form" encType="multipart/form-data" onSubmit={handleUpload} style={{ textAlign: 'left' }}>
+              <input type="file" name="images" id="images" multiple required style={{ paddingLeft: "40px", paddingBottom: "10px" }}/>
+              <br />
+              <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
+                <button type="submit">Upload Images</button>
+              </div>
+              <span style={{ paddingLeft: "40px", paddingBottom: "10px" }}>Task Name</span>
+              <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
+                <input type="text" name="taskname" id="taskname" value={taskName} onChange={(e) => setTaskName(e.target.value)} required/>
+              </div>
             </form>
             <form id="submit-form" onSubmit={handleProcess}>
                 <br />

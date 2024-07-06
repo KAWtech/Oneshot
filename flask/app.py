@@ -24,7 +24,7 @@ def label_images_with_cvat():
     main()
     return "Successful"
 
-def process_with_nodeodm(image_paths):  
+def process_with_nodeodm(image_paths, task_name):  
     # Log the image paths to be processed
     logging.info("Starting NodeODM processing for images: %s", image_paths)
     # NodeODM API URL for creating a new task
@@ -38,6 +38,7 @@ def process_with_nodeodm(image_paths):
         {"name": "end-with", "value": "opensfm"},
     ])
     data = {
+        'name': task_name,
         'options': options
     }
     try:
@@ -152,6 +153,9 @@ def upload_images():
 # the user uploaded and does CVAT labelling, and then starts NodeODM with those images
 @app.route('/process_images', methods=['POST'])
 def process_images():
+    data = request.get_json()
+    task_name = data.get('taskName')
+
     image_paths = []
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -161,7 +165,7 @@ def process_images():
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         future_label = executor.submit(label_images_with_cvat)
         future_label.result()  # Wait for label_images_with_cvat to finish
-        future_process = executor.submit(process_with_nodeodm, image_paths)
+        future_process = executor.submit(process_with_nodeodm, image_paths, task_name)
         uuid = future_process.result()
         future_progress = executor.submit(poll_nodeodm_task_status, uuid)
         progress = future_progress.result()
@@ -197,7 +201,7 @@ def task_complete():
     
     return jsonify({'message': 'Task completed and results saved successfully'}), 200
 
-@app.route('/tasks', methods=['GET'])
+# Retrives tasks to display in frontend card components 
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
     tasks_dir = '/var/www/data/'
@@ -213,9 +217,28 @@ def get_tasks():
                 })
     return jsonify(tasks)
 
+# GET tasks helper
 @app.route('/data/<task_id>/images/<filename>')
 def get_image(task_id, filename):
     return send_from_directory(f'/var/www/data/{task_id}/images', filename)
+
+# Download splat GET
+@app.route('/download_splat/<task_id>', methods=['GET'])
+def download_splat(task_id):
+    try:
+        # Path to the splat.ply file
+        file_path = f"/var/www/data/{task_id}/splat.ply"
+        directory = os.path.dirname(file_path)
+        filename = os.path.basename(file_path)
+
+        # Check if file exists
+        if os.path.exists(file_path):
+            return send_from_directory(directory, filename, as_attachment=True)
+        else:
+            return jsonify({'error': 'File not found'}), 404
+    except Exception as e:
+        logging.error(f"Error downloading file for task {task_id}: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
