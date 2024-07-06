@@ -23,7 +23,7 @@ services:
     user: "root"  # Add this line to set the user to root
 
   opensplat:
-    image: kawtech/oneshot:opensplat_latest
+    image: kawtech/opensplat:gpu
     runtime: nvidia
     volumes:
       - /var/www/data:/var/www/data
@@ -36,7 +36,9 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     networks:
       - bridge_network
       - cvat_cvat
