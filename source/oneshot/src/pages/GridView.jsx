@@ -8,24 +8,20 @@ const GridView = () => {
   const [result, setResult] = useState('');
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
+  const [taskInfo, setTaskInfo] = useState({}); // State for task info
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTaskInfo = async () => {
       try {
-        const response = await fetch('http://localhost:5000/tasks');
+        const response = await fetch('http://localhost:5000/task_info');
         const data = await response.json();
-        console.log('Fetched tasks:', data); // Debugging: Check the response
-        if (Array.isArray(data)) {
-          setTasks(data);
-        } else {
-          console.error('Unexpected data format:', data);
-        }
+        setTaskInfo(data);
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        console.error('Error fetching task info:', error);
       }
     };
 
-    fetchTasks();
+    fetchTaskInfo();
   }, []);
 
   const handleShowModal = () => setShowModal(true);
@@ -51,13 +47,21 @@ const GridView = () => {
   const handleProcess = async (e) => {
     e.preventDefault();
 
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    const date = today.getDate();
+    const hours = today.getHours();
+    const minutes = today.getMinutes();
+    const seconds = today.getSeconds();
+    const currentDate = month + "/" + date + "/" + year + " @ " + hours + ":" + minutes + ":" + seconds;
     try {
       const response = await fetch('http://localhost:5000/process_images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ taskName }) // Include the task name
+        body: JSON.stringify({ taskName, currentDate }) // Include the task name & date
       });
       const data = await response.json();
       setResult(data.message);
@@ -84,27 +88,27 @@ const GridView = () => {
           </button>
         </div>
         <Grid container spacing={5}>
-          {tasks.map((task, index) => (
-            <Grid item key={index}>
+          {Object.entries(taskInfo).map(([uuid, info]) => (
+            <Grid item key={uuid}>
               <Card sx={{ width: 299, height: 300, display: 'flex', flexDirection: 'column',  backgroundColor: '#f9f9f9', position: 'relative' }}>
                 <CardMedia
                   component="img"
                   sx={{height:"140px"}}
-                  image={`http://localhost:5000${task.image_url}`}
+                  image={`http://localhost:5000/data/${uuid}/images/0.jpg`} // Assuming the image_url is part of taskInfo
                   alt="Loading..."
                 />
-              <CardContent sx={{ textAlign: 'left' }}>
-                <Typography gutterBottom variant="h5" component="div" sx={{ width: "267px", marginLeft: "-6px", marginTop: "-3px"}}>
-                  Task Name
-                </Typography>
-                <Typography variant="body2" component="div" sx={{ width: "267px", paddingLeft: "6px"}}>
-                  7/5/2024 @ 17:23
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ marginTop: 'auto' }}>
-                <Button size="small">View Splat</Button>
-                <Button size="small" onClick={() => handleDownload(task.id)}>Download Splat</Button>
-              </CardActions>
+                <CardContent sx={{ textAlign: 'left' }}>
+                  <Typography gutterBottom variant="h5" component="div" sx={{ width: "267px", marginLeft: "-6px", marginTop: "-3px"}}>
+                    {info.taskname || 'Unnamed Task'}
+                  </Typography>
+                  <Typography variant="body2" component="div" sx={{ width: "267px", paddingLeft: "6px"}}>
+                    {info.taskdate || 'Date not available'}
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{ marginTop: 'auto' }}>
+                  <Button size="small">View Splat</Button>
+                  <Button size="small" onClick={() => handleDownload(uuid)}>Download Splat</Button>
+                </CardActions>
               </Card>
             </Grid>
           ))}

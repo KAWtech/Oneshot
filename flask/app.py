@@ -13,12 +13,27 @@ app = Flask(__name__)
 CORS(app)
 current_directory = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(current_directory, 'uploads')
-RESULT_FOLDER = os.path.join(current_directory, 'results')
+JSON_FILE_PATH = '/var/www/data/oneshottasks.json'
 CVAT_RESULTS = os.path.join(current_directory, 'cvat_results')
-os.makedirs(RESULT_FOLDER, exist_ok=True)
+IMAGE_BASE_PATH = '/var/www/data'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CVAT_RESULTS, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
+
+def setup_json_file():
+    """Ensure the JSON file exists and is properly formatted."""
+    if not os.path.exists(JSON_FILE_PATH):
+        os.makedirs(os.path.dirname(JSON_FILE_PATH), exist_ok=True)
+        with open(JSON_FILE_PATH, 'w') as file:
+            json.dump({}, file, indent=4)
+    else:
+        # Check if the file is a valid JSON, otherwise reinitialize it
+        try:
+            with open(JSON_FILE_PATH, 'r') as file:
+                json.load(file)
+        except (json.JSONDecodeError, FileNotFoundError):
+            with open(JSON_FILE_PATH, 'w') as file:
+                json.dump({}, file, indent=4)
 
 def label_images_with_cvat():
     main()
@@ -148,6 +163,30 @@ def upload_images():
 
     return jsonify({'message': 'Images uploaded successfully'}), 200  # Return a success response
 
+def task_complete(taskid, taskdate, taskname):
+    # Load existing data from JSON file
+    if os.path.exists(JSON_FILE_PATH):
+        with open(JSON_FILE_PATH, 'r') as file:
+            try:
+                tasks_data = json.load(file)
+            except json.JSONDecodeError:
+                tasks_data = {}
+    else:
+        tasks_data = {}
+
+    # Add new task data
+    tasks_data[taskid] = {
+        'taskdate': taskdate,
+        'taskname': taskname,
+        'image_url': f"/var/www/data/{taskid}/images/0.jpg"
+    }
+
+    # Save updated data back to JSON file
+    with open(JSON_FILE_PATH, 'w') as file:
+        json.dump(tasks_data, file, indent=4)
+
+    logging.info(f"Task {taskid} completed and saved to {JSON_FILE_PATH}")
+    return jsonify({'message': 'Task completed and results saved successfully'}), 200
 
 # Once user presses "Run Task" on the frontend, this is called and uses the images
 # the user uploaded and does CVAT labelling, and then starts NodeODM with those images
@@ -155,6 +194,7 @@ def upload_images():
 def process_images():
     data = request.get_json()
     task_name = data.get('taskName')
+    task_date = data.get('currentDate')
 
     image_paths = []
     for filename in os.listdir(UPLOAD_FOLDER):
@@ -171,6 +211,7 @@ def process_images():
         progress = future_progress.result()
         future_opensplat = executor.submit(start_opensplat_process, uuid)
         concurrent.futures.wait([future_opensplat], return_when=concurrent.futures.ALL_COMPLETED)
+        task_complete(uuid, task_date, task_name)
     return jsonify({'message': 'Images processed with CVAT and NodeODM successfully'}), 200
 
 # Once NodeODM is at the last stage, it should call this route and POST the .ply, camera poses, and images
@@ -185,21 +226,6 @@ def process_opensplat():
     
     start_opensplat_process(ply_file, images, camera_poses)
     return jsonify({'message': 'OpenSplat process started successfully'}), 200
-
-# Once OpenSplat is done running, it should call this route and then the splat is saved for viewing in our DB
-@app.route('/task_complete', methods=['POST'])
-def task_complete():
-    data = request.json
-    ply_file = data['ply_file']
-    images = data['images']
-    camera_poses = data['camera_poses']
-    
-    # Save the results to RESULT_FOLDER
-    result_path = os.path.join(RESULT_FOLDER, ply_file)
-    result_path = os.path.join(RESULT_FOLDER, images)
-    result_path = os.path.join(RESULT_FOLDER, camera_poses)
-    
-    return jsonify({'message': 'Task completed and results saved successfully'}), 200
 
 # Retrives tasks to display in frontend card components 
 @app.route('/tasks', methods=['GET'])
@@ -216,6 +242,17 @@ def get_tasks():
                     'image_url': f'/data/{name}/images/0.jpg'
                 })
     return jsonify(tasks)
+
+@app.route('/task_info', methods=['GET'])
+def get_task_info():
+    tasks_file_path = '/var/www/data/oneshottasks.json'
+    try:
+        with open(tasks_file_path, 'r') as file:
+            tasks_data = json.load(file)
+        return jsonify(tasks_data)
+    except Exception as e:
+        logging.error(f"Error reading tasks.json: {e}")
+        return jsonify({'error': str(e)}), 500
 
 # GET tasks helper
 @app.route('/data/<task_id>/images/<filename>')
