@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
+import shutil
 import json
 import os
 import logging
@@ -20,6 +21,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CVAT_RESULTS, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
 
+# Helper for writing to JSON file
 def setup_json_file():
     """Ensure the JSON file exists and is properly formatted."""
     if not os.path.exists(JSON_FILE_PATH):
@@ -258,6 +260,26 @@ def get_task_info():
 @app.route('/data/<task_id>/images/<filename>')
 def get_image(task_id, filename):
     return send_from_directory(f'/var/www/data/{task_id}/images', filename)
+
+@app.route('/delete_task/<uuid>', methods=['DELETE'])
+def delete_task(uuid):
+    try:
+        # Remove the corresponding directory
+        task_dir = os.path.join(IMAGE_BASE_PATH, uuid)
+        if os.path.exists(task_dir):
+            shutil.rmtree(task_dir)
+        # Remove the entry from the JSON file
+        if os.path.exists(JSON_FILE_PATH):
+            with open(JSON_FILE_PATH, 'r') as file:
+                tasks_data = json.load(file)
+            if uuid in tasks_data:
+                del tasks_data[uuid]
+                with open(JSON_FILE_PATH, 'w') as file:
+                    json.dump(tasks_data, file, indent=4)
+        return jsonify({'message': f'Task {uuid} deleted successfully'}), 200
+    except Exception as e:
+        logging.error(f"Error deleting task {uuid}: {e}")
+        return jsonify({'error': str(e)}), 500
 
 # Download splat GET
 @app.route('/download_splat/<task_id>', methods=['GET'])

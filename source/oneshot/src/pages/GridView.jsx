@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IoAddCircleSharp } from "react-icons/io5";
-import { Card, CardContent, CardMedia, CardActions, Button, Typography, Grid } from '@mui/material';
+import { Card, CardContent, CardMedia, CardActions, Button, Typography, Grid, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import "../styles/GridView.css";
 
 const GridView = () => {
@@ -70,6 +71,24 @@ const GridView = () => {
     }
   };
 
+  const handleDelete = async (taskId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/delete_task/${taskId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        // Remove the task from the taskInfo state
+        const updatedTaskInfo = { ...taskInfo };
+        delete updatedTaskInfo[taskId];
+        setTaskInfo(updatedTaskInfo);
+      } else {
+        console.error('Failed to delete task:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
   const handleDownload = (taskId) => {
     const url = `http://localhost:5000/download_splat/${taskId}`;
     window.open(url, '_blank');
@@ -93,11 +112,18 @@ const GridView = () => {
               <Card sx={{ width: 299, height: 300, display: 'flex', flexDirection: 'column',  backgroundColor: '#f9f9f9', position: 'relative' }}>
                 <CardMedia
                   component="img"
-                  sx={{height:"140px"}}
+                  sx={{height:"170px"}}
                   image={`http://localhost:5000/data/${uuid}/images/0.jpg`} // Assuming the image_url is part of taskInfo
                   alt="Loading..."
                 />
                 <CardContent sx={{ textAlign: 'left' }}>
+                                  <IconButton
+                  aria-label="delete"
+                  sx={{ position: 'absolute', top: 170, right: 0 }}
+                  onClick={() => handleDelete(uuid)}
+                >
+                  <CloseIcon />
+                </IconButton>
                   <Typography gutterBottom variant="h5" component="div" sx={{ width: "267px", marginLeft: "-6px", marginTop: "-3px"}}>
                     {info.taskname || 'Unnamed Task'}
                   </Typography>
