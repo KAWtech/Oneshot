@@ -46,9 +46,6 @@ dmypy.json
 instance/
 .webassets-cache
 
-# Web
-node_modules/
-
 # CVAT results and uploads
 cvat_results/
 uploads/
