@@ -17,8 +17,8 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
 # Copy requirements and install dependencies
 COPY requirements.txt requirements.txt
 # Ensure flask-cors is installed
-RUN pip3.9 install --no-cache-dir flask-cors==4.0.1
-RUN pip3.9 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir Flask-Cors
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .

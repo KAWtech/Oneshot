@@ -76,7 +76,7 @@ cd ../..
 
 # Start the Web, Flask, NodeODM, and OpenSplat containers
 echo "Starting Web, Flask, NodeODM, and OpenSplat containers..."
-docker compose up -d
+docker compose up -d --build
 
 # Instructions for uploading images
 

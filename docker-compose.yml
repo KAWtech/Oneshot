@@ -9,6 +9,8 @@ services:
     environment:
       - NODE_ENV=production
     restart: unless-stopped
+    depends_on:
+      - flaskapp
     networks:
       - bridge_network
       - cvat_cvat
@@ -22,6 +24,8 @@ services:
       - NODE_ENV=production
     restart: unless-stopped
     stdin_open: true
+    depends_on:
+      - flaskapp
     tty: true
     deploy:
       resources:
@@ -46,9 +50,6 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=development
-    depends_on:
-      - nodeodm
-      - opensplat
     restart: unless-stopped
     networks:
       - bridge_network
@@ -64,6 +65,8 @@ services:
       - ./source:/app
       - /app/node_modules
       - /var/www/data:/var/www/data
+    depends_on:
+      - flaskapp
     environment:
       - NODE_ENV=development
       - PORT=3001
