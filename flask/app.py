@@ -58,7 +58,7 @@ def process_with_nodeodm(image_paths):
         # Close files
         for _, file_tuple in files:
             file_tuple[1].close()
-    time.sleep(50) # ******THIS IS A HARDCODED ASYNC HELPER, NEED TO MAKE IT ASYNC FOR REAL******
+    #time.sleep(50) # ******THIS IS A HARDCODED ASYNC HELPER, NEED TO MAKE IT ASYNC FOR REAL******
     return uuid
     
 def poll_nodeodm_task_status(uuid):
