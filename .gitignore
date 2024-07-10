@@ -42,6 +42,9 @@ ENV/
 .dmypy.json
 dmypy.json
 
+# Node Modules
+source/oneshot/node_modules
+
 # Flask
 instance/
 .webassets-cache
