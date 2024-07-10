@@ -1,7 +1,8 @@
 version: '3.8'
+
 services:
   nodeodm:
-    image: kawtech/oneshot:nodeodm_latest
+    image: opendronemap/nodeodm:gpu
     ports:
       - "3000:3000"
     volumes:
@@ -12,9 +13,17 @@ services:
     networks:
       - bridge_network
       - cvat_cvat
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    user: "root"  # Add this line to set the user to root
 
   opensplat:
-    image: kawtech/oneshot:opensplat_latest
+    image: kawtech/opensplat:gpu
     runtime: nvidia
     volumes:
       - /var/www/data:/var/www/data
@@ -27,7 +36,9 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     networks:
       - bridge_network
       - cvat_cvat

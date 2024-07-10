@@ -61,9 +61,10 @@ docker compose up -d
 
 print_oneshot_logo
 print_instructions_box
+echo "----------------------------------------------------------------------------------------------"
 echo "Oneshot has been successfully started! Happy Splatting!"
 echo "Visit the main Oneshot webpage at http://127.0.0.1:5000"
 echo "Here you can upload images and view the results of the object detection model."
 echo "To monitor task progress you can visit http://127.0.0.1:3000"
-echo "----------------------------------------------------------------------------------------------"
 echo "To visit CVAT, go to http://$CVAT_HOST:8080 and sign-up/login!"
+echo "----------------------------------------------------------------------------------------------"
