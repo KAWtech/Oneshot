@@ -30,6 +30,14 @@ get_ip_address() {
   echo "$ip_address"
 }
 
+# function to check for node installation
+check_node() {
+  if ! command -v node &> /dev/null; then
+    echo "Node.js is not installed. Please install Node.js to continue."
+    exit 1
+  fi
+}
+
 # Automatically determine the IP address
 CVAT_HOST=$(get_ip_address)
 
@@ -52,6 +60,19 @@ sudo ./nuctl-1.11.24-linux-amd64 create project cvat
 sudo ./nuctl-1.11.24-linux-amd64 deploy --project-name cvat --path "serverless/onnx/WongKinYiu/yolov7/nuclio" --platform local
 
 cd ..
+
+cd source/oneshot || {
+  echo "Oneshot directory not found."
+  exit 1
+}
+
+check_node
+
+# install node modules
+echo "Installing Node modules..."
+npm install
+
+cd ../..
 
 # Start the Web, Flask, NodeODM, and OpenSplat containers
 echo "Starting Web, Flask, NodeODM, and OpenSplat containers..."
