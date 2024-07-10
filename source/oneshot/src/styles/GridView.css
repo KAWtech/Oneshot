@@ -10,14 +10,26 @@
 }
 
 .top-bar-text {
-    color: white;
-    font-size: 44px;
-    font-weight: 600;
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     text-align: center;
     top: 50%;
-    transform: translateY(50%);
+    transform: translateY(-50%);
+    position: relative
 }
+
+.text-big {
+    color: rgb(255, 255, 255);
+    font-size: 60px;
+    font-weight: 600;
+}
+
+.text-small {
+    color: rgb(190, 190, 190);
+    font-size: 18px;
+    font-weight: 400;
+    margin-top: 10px; /* Adjust this value to move the small text lower */
+}
+
 .add-task-menu {
     display: flex;
     align-items: center;

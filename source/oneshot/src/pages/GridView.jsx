@@ -97,7 +97,10 @@ const GridView = () => {
   return (
     <div id="wrapper">
       <div className="top-bar-background">
-        <div className="top-bar-text">Oneshot, Ultra Fast Gaussian Splat Processing</div>
+        <div className="top-bar-text">
+          <span class="text-big">Oneshot</span>
+          <span class="text-small">Ultra Fast Gaussian Splat Processing</span>
+        </div>
       </div>
       <div className="body-content">
         <div id="add-task-menu" className="add-task-menu">
