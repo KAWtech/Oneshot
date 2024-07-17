@@ -78,7 +78,15 @@ cd ../..
 echo "Starting Web, Flask, NodeODM, and OpenSplat containers..."
 docker compose up -d --build
 
-# Instructions for uploading images
+# Check if the credentials file exists before running the create_login.py script
+CREDENTIALS_FILE="flask/cvat_credentials.json"
+
+if [ ! -f "$CREDENTIALS_FILE" ]; then
+  echo "Running create_login.py script..."
+  python3 cvat/create_login.py
+else
+  echo "Credentials file already exists. Skipping create_login.py script."
+fi
 
 print_oneshot_logo
 print_instructions_box
