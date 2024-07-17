@@ -2,6 +2,7 @@ import requests
 import json
 import random
 import string
+import os
 
 # Function to generate a random string
 def generate_random_string(length):
@@ -12,8 +13,11 @@ def generate_random_string(length):
 random_username = generate_random_string(6)
 random_password = generate_random_string(12)
 
+# CVAT HOST
+CVAT_HOST = os.getenv('CVAT_HOST')
+
 # Define the URL and payload
-url = "http://192.168.1.165:8080/api/auth/register?org="
+url = f"http://{CVAT_HOST}:8080/api/auth/register?org="
 payload = {
     "username": random_username,
     "first_name": "OneShot",
