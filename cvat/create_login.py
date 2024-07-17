@@ -43,28 +43,36 @@ headers = {
     'Connection': 'keep-alive'
 }
 
-# Make the POST request
-response = requests.post(url, json=payload, headers=headers)
+try:
+    # Make the POST request
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    print(f"Error making the POST request: {e}")
+    response = None
 
-# Save the credentials to a JSON file
-credentials = {
-    "username": payload["username"],
-    "email": payload["email"],
-    "password": payload["password1"]
-}
-with open("flask/cvat_credentials.json", "w") as f:
-    json.dump(credentials, f)
+if response:
+    # Save the credentials to a JSON file
+    credentials = {
+        "username": payload["username"],
+        "email": payload["email"],
+        "password": payload["password1"]
+    }
+    with open("flask/cvat_credentials.json", "w") as f:
+        json.dump(credentials, f)
 
-# Print the response
-print("Status code:", response.status_code)
-print("Response text:", response.text)
+    # Print the response
+    # print("Status code:", response.status_code)
+    # print("Response text:", response.text)
 
-with open("flask/cvat_credentials.json", 'r') as f:
-    credentials = json.load(f)
-    username = credentials.get("username", "")
-    password = credentials.get("password", "")
-    print("----------------------------------------------------------------------------------------------")
-    print("CVAT user has been created!")
-    print(f"Username: {username}")
-    print(f"Password: {password}")
-    print("----------------------------------------------------------------------------------------------")
+    with open("flask/cvat_credentials.json", 'r') as f:
+        credentials = json.load(f)
+        username = credentials.get("username", "")
+        password = credentials.get("password", "")
+        print("----------------------------------------------------------------------------------------------")
+        print("CVAT user has been created!")
+        print(f"Username: {username}")
+        print(f"Password: {password}")
+        print("----------------------------------------------------------------------------------------------")
+else:
+    print("No response received from the server.")

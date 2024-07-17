@@ -54,6 +54,8 @@ cvat_results/
 uploads/
 source/oneshot/node_modules
 flask/__pycache__
+flask/cvat_credentials.json
+Oneshot/flask/__pycache__
 
 # Docker
 *.log
