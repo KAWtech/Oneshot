@@ -31,7 +31,7 @@ payload = {
 # Define the headers
 headers = {
     'Accept': 'application/json, text/plain, */*',
-    'Origin': 'http://192.168.1.165:8080',
+    'Origin': f"http://{CVAT_HOST}:8080",
     'Content-Type': 'application/json',
     'Authorization': '',  # Assuming no value for Authorization based on the given CURL command
     'Referer': 'http://192.168.1.165:8080/auth/register',
