@@ -34,9 +34,9 @@ headers = {
     'Origin': f"http://{CVAT_HOST}:8080",
     'Content-Type': 'application/json',
     'Authorization': '',  # Assuming no value for Authorization based on the given CURL command
-    'Referer': 'http://192.168.1.165:8080/auth/register',
+    'Referer': f"http://{CVAT_HOST}:8080/auth/register",
     'Content-Length': '170',
-    'Host': '192.168.1.165:8080',
+    'Host': f"{CVAT_HOST}:8080",
     'Accept-Language': 'en-US,en;q=0.9',
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
     'Accept-Encoding': 'gzip, deflate',
