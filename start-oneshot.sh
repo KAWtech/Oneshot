@@ -72,7 +72,16 @@ check_node
 echo "Installing Node modules..."
 npm install
 
-cd ../..
+cd src/pages/viewer || {
+  echo "Viewer directory not found."
+  exit 1
+}
+# build the viewer
+echo "Building the viewer..."
+npm run build
+
+cd ../../../../../
+
 
 # Start the Web, Flask, NodeODM, and OpenSplat containers
 echo "Starting Web, Flask, NodeODM, and OpenSplat containers..."
