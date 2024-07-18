@@ -108,13 +108,17 @@ const GridView = () => {
         </div>
       </div>
       <div className="body-content">
-        <div id="add-task-menu" className="add-task-menu">
-          <div className="add-task-text">Make New Splat</div>
-          <button id="add-task-button" className="add-task-button" onClick={handleShowModal}>
-            <IoAddCircleSharp />
-          </button>
-        </div>
-        <Grid container spacing={5}>
+        <Grid container spacing={5} sx={{ marginTop: '5px'}}>
+            {/* Default Card */}
+            <Grid item>
+            <Card
+              sx={{ width: 299, height: 300, display: 'flex', flexDirection: 'column', backgroundColor: '#f9f9f9', position: 'relative', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
+              onClick={handleShowModal}
+            >
+              <IoAddCircleSharp size={50} />
+              <Typography variant="h6">Add New Task</Typography>
+            </Card>
+          </Grid>
           {Object.entries(taskInfo).map(([uuid, info]) => (
             <Grid item key={uuid}>
               <Card sx={{ width: 299, height: 300, display: 'flex', flexDirection: 'column',  backgroundColor: '#f9f9f9', position: 'relative' }}>
