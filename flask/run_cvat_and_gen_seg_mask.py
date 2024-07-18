@@ -15,9 +15,12 @@ import os
 from zipfile import ZipFile
 from time import sleep
 from datetime import datetime
+import json
+with open("cvat_credentials.json", "r") as f:
+    credentials = json.load(f)
 
-USERNAME="internal"
-PASSWORD="Skatka123"
+USERNAME = credentials["username"]
+PASSWORD = credentials["password"]
 now = datetime.now()
 TASK_NAME = "task_" + str(now)
 
