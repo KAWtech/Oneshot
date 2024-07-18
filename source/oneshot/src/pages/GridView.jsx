@@ -94,6 +94,10 @@ const GridView = () => {
     window.open(url, '_blank');
   };
 
+  const openInNewTab = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div id="wrapper">
       <div className="top-bar-background">
@@ -135,7 +139,7 @@ const GridView = () => {
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ marginTop: 'auto' }}>
-                  <Button size="small">View Splat</Button>
+                  <Button size="small" onClick={() => openInNewTab('/viewer/' + uuid)}>View Splat</Button>
                   <Button size="small" onClick={() => handleDownload(uuid)}>Download Splat</Button>
                 </CardActions>
               </Card>
