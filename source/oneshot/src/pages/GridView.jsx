@@ -9,6 +9,7 @@ const GridView = () => {
   const [result, setResult] = useState('');
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
+  const [taskNumber, setTaskNumber] = useState(8000); // State for task number
   const [taskInfo, setTaskInfo] = useState({}); // State for task info
 
   useEffect(() => {
@@ -62,7 +63,7 @@ const GridView = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ taskName, currentDate }) // Include the task name & date
+        body: JSON.stringify({ taskName, taskNumber: taskNumber.toString(), currentDate }) // Include the task name & date
       });
       const data = await response.json();
       setResult(data.message);
@@ -102,8 +103,8 @@ const GridView = () => {
     <div id="wrapper">
       <div className="top-bar-background">
         <div className="top-bar-text">
-          <span class="text-big">Oneshot</span>
-          <span class="text-small">Ultra Fast Gaussian Splat Processing</span>
+          <span className="text-big">Oneshot</span>
+          <span className="text-small">Ultra Fast Gaussian Splat Processing</span>
         </div>
       </div>
       <div className="body-content">
@@ -121,7 +122,7 @@ const GridView = () => {
                   component="img"
                   sx={{height:"170px"}}
                   image={`http://localhost:5000/data/${uuid}/images/0.jpg`} // Assuming the image_url is part of taskInfo
-                  alt="Loading..."
+                  alt=""
                 />
                 <CardContent sx={{ textAlign: 'left' }}>
                                   <IconButton
@@ -161,6 +162,10 @@ const GridView = () => {
               <span style={{ paddingLeft: "40px", paddingBottom: "10px" }}>Task Name</span>
               <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
                 <input type="text" name="taskname" id="taskname" value={taskName} onChange={(e) => setTaskName(e.target.value)} required/>
+              </div>
+              <span style={{ paddingLeft: "40px", paddingBottom: "10px" }}>Gaussian Splat Iterations</span>
+              <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
+                <input type="number" name="tasknumber" id="tasknumber" value={taskNumber} onChange={(e) => setTaskNumber(Number(e.target.value))} min="200" max="100000" required />
               </div>
             </form>
             <form id="submit-form" onSubmit={handleProcess}>
