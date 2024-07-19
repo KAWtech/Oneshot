@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IoAddCircleSharp } from "react-icons/io5";
-import { Card, CardContent, CardMedia, CardActions, Button, Typography, Grid, IconButton } from '@mui/material';
+import { Card, CardContent, CardMedia, CardActions, Button, Typography, Grid, IconButton, Modal, Box, TextField } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import "../styles/GridView.css";
 
@@ -11,6 +11,7 @@ const GridView = () => {
   const [taskName, setTaskName] = useState('');
   const [taskNumber, setTaskNumber] = useState(8000); // State for task number
   const [taskInfo, setTaskInfo] = useState({}); // State for task info
+  const [uploadOk, setUploadOk] = useState(false); // State to track upload status
 
   useEffect(() => {
     const fetchTaskInfo = async () => {
@@ -27,7 +28,10 @@ const GridView = () => {
   }, []);
 
   const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setUploadOk(false); // Reset upload status on modal close
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -40,6 +44,9 @@ const GridView = () => {
         body: formData
       });
       const data = await response.json();
+      if (response.ok) {
+        setUploadOk(true);
+      }
       setResult(data.message);
     } catch (error) {
       console.error('Error:', error);
@@ -152,35 +159,85 @@ const GridView = () => {
           ))}
         </Grid>     
       </div>
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <button onClick={handleCloseModal} className="close-button">&times;</button>
-            <h2>Create Task</h2>
-            <form id="upload-form" encType="multipart/form-data" onSubmit={handleUpload} style={{ textAlign: 'left' }}>
-              <input type="file" name="images" id="images" multiple required style={{ paddingLeft: "40px", paddingBottom: "10px" }}/>
-              <br />
-              <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
-                <button type="submit">Upload Images</button>
-              </div>
-              <span style={{ paddingLeft: "40px", paddingBottom: "10px" }}>Task Name</span>
-              <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
-                <input type="text" name="taskname" id="taskname" value={taskName} onChange={(e) => setTaskName(e.target.value)} required/>
-              </div>
-              <span style={{ paddingLeft: "40px", paddingBottom: "10px" }}>Gaussian Splat Iterations</span>
-              <div style={{ paddingLeft: "40px", paddingBottom: "10px" }}>
-                <input type="number" name="tasknumber" id="tasknumber" value={taskNumber} onChange={(e) => setTaskNumber(Number(e.target.value))} min="200" max="100000" required />
-              </div>
-            </form>
+      <Modal
+        open={showModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseModal}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Create Task
+          </Typography>
+          <form id="upload-form" encType="multipart/form-data" onSubmit={handleUpload} style={{ marginTop: '16px' }}>
+            <input type="file" name="images" id="images" multiple required />
+            <Box sx={{ mt: 2 }}>
+              <Button type="submit" variant="contained" color="primary">
+                Upload Images
+              </Button>
+            </Box>
+          </form>
+          {uploadOk && (
             <form id="submit-form" onSubmit={handleProcess}>
-                <br />
-               <button id="run-button">Run Task</button>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="taskname"
+                label="Task Name"
+                name="taskname"
+                autoComplete="taskname"
+                autoFocus
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="tasknumber"
+                label="Gaussian Splat Iterations"
+                type="number"
+                id="tasknumber"
+                autoComplete="tasknumber"
+                value={taskNumber}
+                onChange={(e) => setTaskNumber(Number(e.target.value))}
+                inputProps={{ min: 200, max: 100000 }}
+              />
+              <Box sx={{ mt: 2 }}>
+                <Button id="run-button" type="submit" variant="contained" color="primary">
+                  Run Task
+                </Button>
+              </Box>
             </form>
-          </div>
-        </div>
-      )}
+          )}
+        </Box>
+      </Modal>
     </div>
   );
+};
+
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
 };
 
 export default GridView;
