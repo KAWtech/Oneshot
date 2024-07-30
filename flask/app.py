@@ -99,7 +99,7 @@ def poll_nodeodm_task_status(uuid):
         time.sleep(10)
     return "NodeODM task completed"
 
-def start_opensplat_process(uuid):
+def start_opensplat_process(uuid, task_iter):
     # Add opensplat process integration here
     # Construct the path to the NodeODM task data
     task_data_path = f"/var/www/data/{uuid}"
@@ -109,7 +109,7 @@ def start_opensplat_process(uuid):
     logging.info("starting opensplat process")
     # Assuming we need to call OpenSplat with this path
     # Replace 'opensplat_executable_path' with the actual path to your OpenSplat executable if necessary
-    opensplat_command = f"docker exec oneshot-opensplat-1 /code/build/opensplat {task_data_path} -o {output_path} -n 100"
+    opensplat_command = f"docker exec oneshot-opensplat-1 /code/build/opensplat {task_data_path} -o {output_path} -n {task_iter}"
     logging.info(f"about to run opensplate command {opensplat_command}")
     try:
         # Import subprocess to execute the external command
@@ -199,6 +199,7 @@ def process_images():
     data = request.get_json()
     task_name = data.get('taskName')
     task_date = data.get('currentDate')
+    task_iter = data.get('taskNumber')
 
     image_paths = []
     for filename in os.listdir(UPLOAD_FOLDER):
@@ -213,7 +214,7 @@ def process_images():
         uuid = future_process.result()
         future_progress = executor.submit(poll_nodeodm_task_status, uuid)
         progress = future_progress.result()
-        future_opensplat = executor.submit(start_opensplat_process, uuid)
+        future_opensplat = executor.submit(start_opensplat_process, uuid, task_iter)
         concurrent.futures.wait([future_opensplat], return_when=concurrent.futures.ALL_COMPLETED)
         task_complete(uuid, task_date, task_name)
     return jsonify({'message': 'Images processed with CVAT and NodeODM successfully'}), 200
@@ -262,6 +263,10 @@ def get_task_info():
 @app.route('/data/<task_id>/images/<filename>')
 def get_image(task_id, filename):
     return send_from_directory(f'/var/www/data/{task_id}/images', filename)
+
+@app.route('/get_splat/<task_id>/<filename>')
+def get_splat_file(task_id, filename):
+    return send_from_directory(f'/var/www/data/{task_id}', filename)
 
 @app.route('/delete_task/<uuid>', methods=['DELETE'])
 def delete_task(uuid):
